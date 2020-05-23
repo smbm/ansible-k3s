@@ -1,0 +1,28 @@
+---
+- hosts: glusterfs
+  gather_facts: yes
+  roles:
+    - role: geerlingguy.glusterfs
+      become: yes
+    - role: glusterfs_create_volume
+      become: yes
+    - role: glusterfs_nfs_ganesha
+      become: yes
+
+- hosts: cluster
+  gather_facts: yes
+  roles:
+    - role: enable_cgroups
+      become: yes
+    - role: k3s_download
+      become: yes
+
+- hosts: master
+  roles:
+    - role: k3s_master
+      become: yes
+
+- hosts: nodes
+  roles:
+    - role: k3s_node
+      become: yes

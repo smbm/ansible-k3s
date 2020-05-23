@@ -1,0 +1,7 @@
+---
+virtual_disk_path: /var/gluster_brick.img
+virtual_disk_size_mb: 8192
+virtual_disk_mount_point: /mnt/brick
+
+glusterfs_mount_point: /mnt/gluster
+glusterfs_volume_name: kubernetes

@@ -1,0 +1,6 @@
+---
+systemd_dir: /etc/systemd/system
+glusterfs_mount_point: /mnt/gluster
+glusterfs_volume_name: kubernetes
+ganesha_nfs_psuedo_mount_point: /gluster
+ganesha_nfs_export_id: 4242

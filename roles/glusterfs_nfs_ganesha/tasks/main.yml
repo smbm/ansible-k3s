@@ -1,0 +1,45 @@
+---
+
+- name: Install nfs-common because it is useful
+  apt:
+    name:
+      - nfs-common
+    update_cache: yes
+    cache_valid_time: 3600
+    state: present
+
+- name: Install Ganesha NFS from GlusterFS repo
+  apt:
+    name:
+      - nfs-ganesha-gluster
+    update_cache: yes
+    cache_valid_time: 3600
+    state: present
+
+- name: Ganesha NFS config file
+  copy:
+    dest: /etc/ganesha/ganesha.conf
+    content: "{{ lookup('template', 'templates/ganesha.conf.j2') }}"
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - reload Ganesha NFS
+
+- name: Install custom NFS Ganesha service
+  register: nfs_ganesha_service
+  template:
+    src: "nfs-ganesha.service.j2"
+    dest: "{{ systemd_dir }}/nfs-ganesha.service"
+    owner: root
+    group: root
+    mode: 0755
+  notify:
+    - restart Ganesha NFS
+
+- name: Enable Ganesha NFS service
+  systemd:
+    name: nfs-ganesha
+    daemon_reload: yes
+    state: started
+    enabled: yes

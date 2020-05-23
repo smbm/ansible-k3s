@@ -1,0 +1,42 @@
+NFS_CORE_PARAM {
+	## Allow NFSv3 to mount paths with the Pseudo path, the same as NFSv4,
+	## instead of using the physical paths.
+	#mount_path_pseudo = true;
+	Protocols = 3,4,9P;
+}
+
+EXPORT {
+	## Export Id (mandatory, each EXPORT must have a unique Export_Id)
+	Export_Id = 4242;
+
+	## Exported path (mandatory)
+	Path = "{{ glusterfs_mount_point }}";
+
+	## Pseudo Path (required for NFSv4 or if mount_path_pseudo = true)
+	Pseudo = "{{ ganesha_nfs_psuedo_mount_point }}";
+
+	## Restrict the protocols that may use this export.  This cannot allow
+	## access that is denied in NFS_CORE_PARAM.
+	Protocols = 3,4;
+
+	## Access type for clients.  Default is None, so some access must be
+	## given. It can be here, in the EXPORT_DEFAULTS, or in a CLIENT block
+    Access_Type = RW;
+
+	## Whether to squash various users.
+	Squash = "No_root_squash";
+
+	Disable_ACL = TRUE;
+
+	## Allowed security types for this export
+	Sectype = "sys";
+
+	## Exporting FSAL
+	FSAL {
+		Name = GLUSTER;
+
+		hostname="{{ ansible_default_ipv4.address }}";
+
+		volume="{{ glusterfs_volume_name }}";
+	}
+}

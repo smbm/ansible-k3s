@@ -1,0 +1,13 @@
+[master]
+10.10.10.130
+
+[nodes]
+10.10.10.131
+
+[cluster:children]
+master
+nodes
+
+[glusterfs:children]
+master
+nodes

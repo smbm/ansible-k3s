@@ -1,0 +1,54 @@
+---
+
+- name: Create on disk brick volume for Gluster
+  block:
+    - name: Create virtual disk if not present
+      command:
+        cmd: /usr/bin/dd if=/dev/zero of={{ virtual_disk_path }} bs=1M count={{ virtual_disk_size_mb }}
+        creates: "{{ virtual_disk_path }}"
+
+    - name: Create XFS FS for virtual disk
+      filesystem:
+        fstype: xfs
+        dev: "{{ virtual_disk_path }}"
+
+    - name: Create virtual disk mountpoint
+      file:
+        path: "{{ virtual_disk_mount_point }}"
+        state: directory
+
+    - name: Mount virtual disk to mount point
+      mount:
+        path: "{{ virtual_disk_mount_point }}"
+        src: "{{ virtual_disk_path }}"
+        fstype: xfs
+        state: mounted
+
+    - name: Create brick subdirectory
+      file:
+        path: "{{ virtual_disk_mount_point }}/brick"
+        state: directory
+
+- name: Create Gluster volume and mount it to
+  block:
+    - name: Create mountpoint
+      file:
+        path: "{{ glusterfs_mount_point }}"
+        state: directory
+
+    - name: Configure Gluster volume
+      gluster_volume:
+        state: present
+        name: "{{ glusterfs_volume_name }}"
+        bricks: "{{ virtual_disk_mount_point }}/brick"
+        replicas: 2
+        cluster: "{{ groups.glusterfs | join(',') }}"
+      run_once: true
+
+    - name: Mount Gluster volume
+      mount:
+        name: /mnt/gluster
+        src: "{{ inventory_hostname }}:/{{ glusterfs_volume_name }}"
+        fstype: glusterfs
+        opts: "defaults,_netdev"
+        state: mounted

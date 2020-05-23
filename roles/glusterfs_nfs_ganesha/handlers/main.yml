@@ -1,0 +1,12 @@
+---
+
+- name: reload Ganesha NFS
+  systemd:
+    name: nfs-ganesha
+    state: reloaded
+
+- name: restart Ganesha NFS
+  systemd:
+    name: nfs-ganesha
+    state: restarted
+    daemon_reload: yes

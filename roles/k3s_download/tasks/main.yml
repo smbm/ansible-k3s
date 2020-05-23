@@ -1,0 +1,26 @@
+---
+- name: Check if k3s binary exists
+  stat:
+    path: /usr/local/bin/k3s
+  register: _k3s_binary
+
+- name: Check current k3s version
+  command: /usr/local/bin/k3s --version
+  register: _k3s_local_version_string
+  when: _k3s_binary.stat.exists
+  # If this statement becomes false it will show as changed. IE if the versions do not match
+  changed_when: "_k3s_local_version_string.stdout.find( k3s_version ) == -1"
+
+- name: Parse current version
+  set_fact:
+    _k3s_local_version: "{{ _k3s_local_version_string.stdout.split(' ')[2] }}"
+  when: _k3s_local_version_string is defined
+
+- name: Grab k3s binary
+  get_url:
+    url: https://github.com/rancher/k3s/releases/download/{{ k3s_version }}/{{ binary_architecture_map[ansible_facts.architecture] }}
+    dest: /usr/local/bin/k3s
+    owner: root
+    group: root
+    mode: 0755
+  when: ( not _k3s_binary.stat.exists ) or ( _k3s_local_version != k3s_version )
